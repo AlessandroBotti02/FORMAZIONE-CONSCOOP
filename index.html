@@ -1,0 +1,1913 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema Analisi Bandi — Copilot 365</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Prompt:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --inchiostro: #212121;
+  --blu-notte: #022f47;
+  --blu-medio: #0f5f86;
+  --oro: #ffd64f;
+  --oro-chiaro: #ffea9a;
+  --carta: #ffffff;
+  --carta-scura: #f5f5f5;
+  --grigio: #616161;
+  --linea: #dddedf;
+  --verde-ok: #11b76b;
+  --verde-light: #e6f6ed;
+  --rosso: #cf2e2e;
+  --rosso-light: #fce4ec;
+  --arancio: #ff6900;
+  --arancio-light: #fff2d7;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Montserrat', Verdana, sans-serif;
+  background: var(--carta);
+  color: var(--inchiostro);
+  line-height: 1.7;
+  font-size: 16px;
+}
+
+/* NAV TABS */
+.nav {
+  background: var(--blu-notte);
+  display: flex;
+  gap: 0;
+  z-index: 100;
+  border-bottom: 3px solid var(--oro);
+}
+.nav-main {
+  position: sticky;
+  top: 0;
+}
+.nav-sub {
+  display: none;
+  background: var(--blu-medio);
+  border-bottom: 1px solid rgba(255,255,255,0.18);
+}
+.nav-sub.active {
+  display: flex;
+}
+.nav-tab {
+  padding: 16px 28px;
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  font-family: 'Montserrat', Verdana, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -3px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.nav-tab:hover { color: rgba(255,255,255,0.8); }
+.nav-tab.active { color: var(--oro-chiaro); border-bottom-color: var(--oro); }
+.nav-sub .nav-tab {
+  padding: 12px 22px;
+  font-size: 13px;
+  letter-spacing: 0.8px;
+}
+
+/* REPOSITORY PROMPT */
+.repo-controls {
+  background: white;
+  border: 1px solid var(--linea);
+  border-radius: 4px;
+  padding: 20px 22px;
+  margin-bottom: 24px;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr auto;
+  gap: 12px;
+  align-items: center;
+}
+.repo-search,
+.repo-filter {
+  width: 100%;
+  border: 1px solid var(--linea);
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-family: 'Montserrat', Verdana, sans-serif;
+  font-size: 15px;
+  color: var(--inchiostro);
+  background: #fff;
+}
+.repo-count {
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--grigio);
+  text-align: right;
+}
+.repo-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+.repo-card {
+  background: white;
+  border: 1px solid var(--linea);
+  border-left: 4px solid var(--blu-medio);
+  border-radius: 4px;
+  padding: 18px 20px;
+}
+.repo-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.repo-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.repo-chip {
+  font-size: 11px;
+  padding: 3px 9px;
+  border: 1px solid var(--linea);
+  border-radius: 2px;
+  color: #455a64;
+  background: var(--carta-scura);
+  letter-spacing: 0.5px;
+}
+.repo-title {
+  font-family: 'Prompt', 'Book Antiqua', Georgia, serif;
+  font-size: 1.05rem;
+  color: var(--inchiostro);
+}
+.repo-copy {
+  border: 1px solid var(--blu-medio);
+  background: var(--blu-notte);
+  color: #fff;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 12px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.repo-copy:hover {
+  background: var(--blu-medio);
+}
+.repo-text {
+  background: var(--blu-notte);
+  color: #e8f0fe;
+  border-radius: 4px;
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-line;
+  border-left: 3px solid var(--oro);
+}
+.repo-empty {
+  background: white;
+  border: 1px dashed var(--linea);
+  border-radius: 4px;
+  padding: 22px;
+  font-size: 15px;
+  color: var(--grigio);
+  text-align: center;
+}
+
+/* PAGES */
+.page { display: none; }
+.page.active { display: block; }
+
+/* HEADER COMUNE */
+.page-header {
+  background: var(--blu-notte);
+  color: white;
+  padding: 52px 64px 44px;
+  position: relative;
+  overflow: hidden;
+}
+.page-header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 40px,
+    rgba(255,214,79,0.08) 40px,
+    rgba(255,214,79,0.08) 41px
+  );
+}
+.header-kicker {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--oro);
+  margin-bottom: 14px;
+}
+.page-header h1 {
+  font-family: 'Prompt', 'Book Antiqua', Georgia, serif;
+  font-size: 2.8rem;
+  font-weight: 900;
+  line-height: 1.05;
+  margin-bottom: 16px;
+}
+.page-header h1 em {
+  font-style: italic;
+  color: var(--oro-chiaro);
+}
+.page-header p {
+  font-size: 17px;
+  color: rgba(255,255,255,0.65);
+  max-width: 620px;
+  font-weight: 300;
+}
+.header-meta {
+  display: flex;
+  gap: 24px;
+  margin-top: 28px;
+  flex-wrap: wrap;
+}
+.meta-chip {
+  font-size: 12px;
+  padding: 5px 14px;
+  border: 1px solid rgba(255,214,79,0.45);
+  border-radius: 3px;
+  color: rgba(255,255,255,0.7);
+  background: rgba(255,214,79,0.16);
+}
+
+/* LAYOUT */
+main { max-width: 1080px; margin: 0 auto; padding: 52px 40px; }
+
+/* SEZIONE TITOLO */
+.sezione {
+  margin-bottom: 52px;
+}
+.sezione-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid var(--oro);
+}
+.sezione-num {
+  font-family: 'Prompt', 'Book Antiqua', Georgia, serif;
+  font-size: 3rem;
+  font-weight: 900;
+  color: var(--oro);
+  line-height: 1;
+  opacity: 0.35;
+}
+.sezione-titolo {
+  font-family: 'Prompt', 'Book Antiqua', Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--blu-notte);
+}
+.sezione-desc {
+  font-size: 15px;
+  color: var(--grigio);
+  font-style: italic;
+}
+
+/* CARD DOC AZIENDALE */
+.doc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 720px) {
+  .doc-grid { grid-template-columns: 1fr; }
+  .page-header { padding: 32px 24px; }
+  .page-header h1 { font-size: 1.9rem; }
+  main { padding: 32px 20px; }
+  .nav-tab { padding: 12px 16px; font-size: 12px; }
+  .repo-controls { grid-template-columns: 1fr; }
+  .repo-count { text-align: left; }
+}
+
+.campo-card {
+  background: white;
+  border: 1px solid var(--linea);
+  border-radius: 4px;
+  padding: 22px 24px;
+  position: relative;
+}
+.campo-card.full { grid-column: 1 / -1; }
+.campo-card.critico { border-left: 4px solid var(--rosso); }
+.campo-card.importante { border-left: 4px solid var(--oro); }
+.campo-card.standard { border-left: 4px solid #b0bec5; }
+
+.campo-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 2px;
+  margin-bottom: 8px;
+}
+.badge-critico { background: var(--rosso-light); color: var(--rosso); }
+.badge-importante { background: #fff8e1; color: #795500; }
+.badge-standard { background: #f5f5f5; color: #607d8b; }
+
+.campo-nome {
+  font-family: 'Prompt', 'Book Antiqua', Georgia, serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--inchiostro);
+  margin-bottom: 6px;
+}
+.campo-desc {
+  font-size: 14px;
+  color: var(--grigio);
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+.campo-esempio {
+  background: var(--carta-scura);
+  border-radius: 3px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #37474f;
+  font-style: italic;
+  border-left: 2px solid var(--linea);
+}
+.campo-esempio strong {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--grigio);
+  margin-bottom: 4px;
+  font-style: normal;
+}
+
+/* PROMPT FLOW */
+.flusso {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+}
+.flusso::before {
+  content: '';
+  position: absolute;
+  left: 28px;
+  top: 40px;
+  bottom: 40px;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--oro), var(--linea));
+}
+
+.prompt-card {
+  display: flex;
+  gap: 24px;
+  padding: 20px 0;
+  position: relative;
+}
+.prompt-num-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+.prompt-num {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Prompt', 'Book Antiqua', Georgia, serif;
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: white;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+.tipo-base { background: #607d8b; }
+.tipo-estrazione { background: var(--blu-medio); }
+.tipo-soa { background: var(--blu-notte); }
+.tipo-tecnica { background: var(--verde-ok); }
+.tipo-checklist { background: #00727a; }
+.tipo-piano { background: var(--arancio); }
+.tipo-valutazione { background: var(--rosso); }
+
+.prompt-body {
+  flex: 1;
+  background: white;
+  border: 1px solid var(--linea);
+  border-radius: 4px;
+  padding: 24px 28px;
+  margin-bottom: 4px;
+}
+
+.prompt-tipo-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.label-base { color: #607d8b; }
+.label-estrazione { color: var(--blu-medio); }
+.label-soa { color: var(--blu-notte); }
+.label-tecnica { color: var(--verde-ok); }
+.label-checklist { color: #00727a; }
+.label-piano { color: var(--arancio); }
+.label-valutazione { color: var(--rosso); }
+
+.prompt-titolo {
+  font-family: 'Prompt', 'Book Antiqua', Georgia, serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--inchiostro);
+}
+.prompt-scopo {
+  font-size: 14px;
+  color: var(--grigio);
+  font-style: italic;
+  margin-bottom: 16px;
+}
+.prompt-copy {
+  border: 1px solid var(--blu-medio);
+  background: var(--blu-notte);
+  color: #fff;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 12px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  display: block;
+  margin-left: auto;
+  margin-bottom: 10px;
+}
+.prompt-copy:hover {
+  background: var(--blu-medio);
+}
+.prompt-testo {
+  background: var(--blu-notte);
+  color: #e8f0fe;
+  border-radius: 4px;
+  padding: 16px 20px;
+  font-family: 'Montserrat', Verdana, sans-serif;
+  font-size: 14px;
+  line-height: 1.65;
+  white-space: pre-line;
+  border-left: 3px solid var(--oro);
+}
+.prompt-testo em {
+  color: var(--oro-chiaro);
+  font-style: normal;
+}
+.prompt-note {
+  margin-top: 14px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.nota-tag {
+  font-size: 11.5px;
+  padding: 3px 10px;
+  border-radius: 2px;
+  border: 1px solid;
+}
+.tag-output { background: var(--verde-light); color: var(--verde-ok); border-color: #a5d6a7; }
+.tag-tool { background: var(--carta-scura); color: #546e7a; border-color: var(--linea); }
+.tag-attenzione { background: #fff8e1; color: #795500; border-color: #ffe082; }
+.tag-nuovo { background: var(--rosso-light); color: var(--rosso); border-color: #ef9a9a; }
+
+/* CONNETTORE */
+.connettore {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0 8px 68px;
+  font-size: 12px;
+  color: var(--grigio);
+  font-style: italic;
+}
+.connettore::before {
+  content: '↓';
+  color: var(--oro);
+  font-size: 16px;
+  font-style: normal;
+}
+
+/* SEPARATORE SEZIONE NEL FLUSSO */
+.flusso-sep {
+  background: var(--carta-scura);
+  border: 1px solid var(--linea);
+  border-radius: 4px;
+  padding: 12px 20px;
+  margin: 16px 0 16px 68px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--grigio);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.flusso-sep::before { content: '◆'; color: var(--oro); }
+
+/* LEGENDA */
+.legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 32px;
+  padding: 18px 22px;
+  background: white;
+  border: 1px solid var(--linea);
+  border-radius: 4px;
+}
+.legenda-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--grigio);
+}
+.legenda-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+/* VALUTAZIONE PAGE */
+.valutazione-intro {
+  background: var(--blu-notte);
+  color: white;
+  border-radius: 4px;
+  padding: 28px 32px;
+  margin-bottom: 32px;
+  border-left: 4px solid var(--oro);
+}
+.valutazione-intro h3 {
+  font-family: 'Prompt', 'Book Antiqua', Georgia, serif;
+  font-size: 1.2rem;
+  color: var(--oro-chiaro);
+  margin-bottom: 10px;
+}
+.valutazione-intro p {
+  font-size: 15px;
+  color: rgba(255,255,255,0.75);
+  line-height: 1.6;
+}
+
+.schema-flusso {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr;
+  gap: 0;
+  align-items: center;
+  margin-bottom: 40px;
+  background: white;
+  border: 1px solid var(--linea);
+  border-radius: 4px;
+  padding: 28px 24px;
+}
+.schema-box {
+  text-align: center;
+  padding: 16px;
+}
+.schema-icon { font-size: 28px; margin-bottom: 8px; }
+.schema-titolo {
+  font-family: 'Prompt', 'Book Antiqua', Georgia, serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--blu-notte);
+  margin-bottom: 4px;
+}
+.schema-sub { font-size: 12px; color: var(--grigio); font-style: italic; }
+.schema-freccia { font-size: 22px; color: var(--oro); text-align: center; }
+
+/* DOC STRUCTURE */
+.struttura-doc {
+  background: white;
+  border: 1px solid var(--linea);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+.struttura-header {
+  background: var(--blu-notte);
+  color: white;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.struttura-header-icon { font-size: 20px; }
+.struttura-header-title {
+  font-family: 'Prompt', 'Book Antiqua', Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+.struttura-header-sub { font-size: 12px; color: rgba(255,255,255,0.6); }
+.struttura-body { padding: 20px 24px; }
+.struttura-item {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--carta-scura);
+}
+.struttura-item:last-child { border-bottom: none; }
+.struttura-step {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--carta-scura);
+  border: 2px solid var(--linea);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--grigio);
+  flex-shrink: 0;
+}
+.struttura-content { flex: 1; }
+.struttura-nome { font-weight: 600; font-size: 14.5px; margin-bottom: 2px; }
+.struttura-desc { font-size: 13px; color: var(--grigio); }
+
+/* ESEMPIO OUTPUT VALUTAZIONE */
+.output-esempio {
+  background: var(--carta-scura);
+  border: 1px solid var(--linea);
+  border-radius: 4px;
+  padding: 28px 32px;
+}
+.output-esempio h3 {
+  font-family: 'Prompt', 'Book Antiqua', Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--blu-notte);
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--linea);
+  padding-bottom: 10px;
+}
+.score-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--linea);
+}
+.score-row:last-child { border-bottom: none; }
+.score-label { flex: 1; font-size: 14px; }
+.score-bar-wrap {
+  width: 180px;
+  height: 8px;
+  background: #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.score-bar {
+  height: 100%;
+  border-radius: 4px;
+}
+.bar-verde { background: var(--verde-ok); }
+.bar-oro { background: var(--oro); }
+.bar-rosso { background: var(--rosso); }
+.score-val {
+  font-family: 'Prompt', 'Book Antiqua', Georgia, serif;
+  font-size: 1rem;
+  font-weight: 700;
+  min-width: 40px;
+  text-align: right;
+}
+.verde { color: var(--verde-ok); }
+.rosso { color: var(--rosso); }
+.oro { color: #795500; }
+
+.verdict {
+  margin-top: 20px;
+  padding: 16px 20px;
+  border-radius: 4px;
+  font-size: 14.5px;
+  font-weight: 600;
+}
+.verdict.positivo { background: var(--verde-light); color: var(--verde-ok); border-left: 4px solid var(--verde-ok); }
+.verdict.attenzione { background: #fff8e1; color: #795500; border-left: 4px solid var(--oro); }
+.verdict.negativo { background: var(--rosso-light); color: var(--rosso); border-left: 4px solid var(--rosso); }
+
+footer {
+  text-align: center;
+  padding: 32px;
+  font-size: 13px;
+  color: var(--grigio);
+  border-top: 1px solid var(--linea);
+  font-style: italic;
+}
+</style>
+</head>
+<body>
+
+<div class="nav nav-main">
+  <div class="nav-tab nav-main-tab active" onclick="showArea('gare', this)">Gare</div>
+  <div class="nav-tab nav-main-tab" onclick="showArea('teams', this)">Teams</div>
+  <div class="nav-tab nav-main-tab" onclick="showArea('repository', this)">Repository Prompt</div>
+</div>
+<div class="nav nav-sub active" id="gare-subnav">
+  <div class="nav-tab nav-sub-tab active" onclick="showGarePage('doc', this)">① Documento Aziendale</div>
+  <div class="nav-tab nav-sub-tab" onclick="showGarePage('flusso', this)">② Flusso Prompt Bando</div>
+  <div class="nav-tab nav-sub-tab" onclick="showGarePage('valutazione', this)">③ Prompt di Valutazione</div>
+</div>
+
+<!-- ===================== PAGINA 1: DOCUMENTO AZIENDALE ===================== -->
+<div class="page active" id="page-doc">
+  <div class="page-header">
+    <div class="header-kicker">Fase 1 di 3</div>
+    <h1>Il Documento<br><em>Aziendale</em></h1>
+    <p>La "carta d'identità" dell'organizzazione che Copilot userà come riferimento per valutare ogni bando. Va creato una volta e aggiornato periodicamente.</p>
+    <div class="header-meta">
+      <span class="meta-chip">Da creare in Word con Copilot</span>
+      <span class="meta-chip">Aggiornamento consigliato: semestrale</span>
+      <span class="meta-chip">Lunghezza ideale: 4–8 pagine</span>
+    </div>
+  </div>
+
+  <main>
+    <div class="sezione">
+      <div class="sezione-header">
+        <div class="sezione-num">1</div>
+        <div>
+          <div class="sezione-titolo">Come costruirlo con Copilot in Word</div>
+          <div class="sezione-desc">Scaletta operativa — cosa fare, in che ordine, con quale prompt</div>
+        </div>
+      </div>
+
+      <div class="struttura-doc">
+        <div class="struttura-header">
+          <div class="struttura-header-icon">📋</div>
+          <div>
+            <div class="struttura-header-title">Procedura di creazione guidata</div>
+            <div class="struttura-header-sub">Aprire Word con Copilot attivo → seguire i passi nell'ordine</div>
+          </div>
+        </div>
+        <div class="struttura-body">
+          <div class="struttura-item">
+            <div class="struttura-step">1</div>
+            <div class="struttura-content">
+              <div class="struttura-nome">Prompt di impostazione iniziale</div>
+              <div class="struttura-desc">Dire a Copilot cosa si sta costruendo e il contesto d'uso. Questo "imposta" la logica di tutto ciò che segue nel documento.</div>
+            </div>
+          </div>
+          <div class="struttura-item">
+            <div class="struttura-step">2</div>
+            <div class="struttura-content">
+              <div class="struttura-nome">Dati anagrafici e identità giuridica</div>
+              <div class="struttura-desc">Inserire manualmente o dettare a Copilot: ragione sociale, CF/PIVA, forma giuridica, sede, CCIAA, PEC, legale rappresentante.</div>
+            </div>
+          </div>
+          <div class="struttura-item">
+            <div class="struttura-step">3</div>
+            <div class="struttura-content">
+              <div class="struttura-nome">Qualificazioni SOA (sezione critica)</div>
+              <div class="struttura-desc">Elencare tutte le categorie SOA possedute con classifica, scadenza validità, SOA rilasciante. Copilot formatterà in tabella.</div>
+            </div>
+          </div>
+          <div class="struttura-item">
+            <div class="struttura-step">4</div>
+            <div class="struttura-content">
+              <div class="struttura-nome">Referenze lavori eseguiti (ultimi 5 anni)</div>
+              <div class="struttura-desc">Per ciascun lavoro: committente, oggetto, importo, anno completamento, categoria SOA coinvolta. Copilot riorganizza in formato gara.</div>
+            </div>
+          </div>
+          <div class="struttura-item">
+            <div class="struttura-step">5</div>
+            <div class="struttura-content">
+              <div class="struttura-nome">Certificazioni e attestazioni</div>
+              <div class="struttura-desc">ISO 9001, ISO 14001, SA8000, OHSAS/ISO 45001, rating legalità, white list prefettura, ecc. Con numero certificato e scadenza.</div>
+            </div>
+          </div>
+          <div class="struttura-item">
+            <div class="struttura-step">6</div>
+            <div class="struttura-content">
+              <div class="struttura-nome">Capacità economico-finanziaria</div>
+              <div class="struttura-desc">Fatturato globale ultimi 3 anni, fatturato specifico in lavori pubblici, eventuali linee di credito disponibili.</div>
+            </div>
+          </div>
+          <div class="struttura-item">
+            <div class="struttura-step">7</div>
+            <div class="struttura-content">
+              <div class="struttura-nome">Struttura organizzativa e personale chiave</div>
+              <div class="struttura-desc">Organigramma sintetico, figure professionali rilevanti (direttori tecnici, coordinatori sicurezza), numero dipendenti.</div>
+            </div>
+          </div>
+          <div class="struttura-item">
+            <div class="struttura-step">8</div>
+            <div class="struttura-content">
+              <div class="struttura-nome">Aree geografiche e settori di attività</div>
+              <div class="struttura-desc">Regioni/province dove si opera abitualmente, tipologie di lavori per cui si ha expertise concreta (non solo SOA formale).</div>
+            </div>
+          </div>
+          <div class="struttura-item">
+            <div class="struttura-step">9</div>
+            <div class="struttura-content">
+              <div class="struttura-nome">Limiti e vincoli operativi</div>
+              <div class="struttura-desc">Importi minimi/massimi che si vuole gestire, settori esclusi, regioni dove non si opera, eventuali limitazioni di subappalto.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sezione">
+      <div class="sezione-header">
+        <div class="sezione-num">2</div>
+        <div>
+          <div class="sezione-titolo">Campi da compilare — priorità e formato</div>
+          <div class="sezione-desc">Ogni campo ha un livello di criticità per il funzionamento del sistema di valutazione</div>
+        </div>
+      </div>
+
+      <div class="doc-grid">
+
+        <div class="campo-card critico">
+          <div class="campo-badge badge-critico">🔴 Critico per la valutazione</div>
+          <div class="campo-nome">Categorie SOA possedute</div>
+          <div class="campo-desc">È il campo più importante. Senza questi dati Copilot non può valutare la partecipabilità al bando. Deve essere sempre aggiornato.</div>
+          <div class="campo-esempio">
+            <strong>Formato consigliato</strong>
+            OG1 classifica V — scadenza 15/03/2027 — SOA Italcert<br>
+            OS3 classifica II — scadenza 15/03/2027 — SOA Italcert<br>
+            OS30 classifica I — scadenza 15/03/2027 — SOA Italcert
+          </div>
+        </div>
+
+        <div class="campo-card critico">
+          <div class="campo-badge badge-critico">🔴 Critico per la valutazione</div>
+          <div class="campo-nome">Fatturato specifico in lavori (ultimi 3 anni)</div>
+          <div class="campo-desc">Serve per verificare i requisiti economico-finanziari richiesti dai bandi. Indicare anno per anno e suddividere per categoria di lavori.</div>
+          <div class="campo-esempio">
+            <strong>Formato consigliato</strong>
+            2023: €2.1M (di cui OG1: €1.8M, OS3: €0.3M)<br>
+            2024: €2.8M (di cui OG1: €2.4M, OS3: €0.4M)<br>
+            2025: €3.2M (di cui OG1: €2.8M, OS30: €0.4M)
+          </div>
+        </div>
+
+        <div class="campo-card importante">
+          <div class="campo-badge badge-importante">🟡 Importante per la strategia</div>
+          <div class="campo-nome">Referenze principali (ultimi 5 anni)</div>
+          <div class="campo-desc">Elenco dei lavori completati con committente, importo e categoria SOA. Copilot le userà per verificare i requisiti tecnico-professionali.</div>
+          <div class="campo-esempio">
+            <strong>Formato consigliato</strong>
+            2023 — Comune di X — Rifacimento strade quartiere Y — €1.2M — OG1<br>
+            2024 — Regione Z — Sistemazione aree verdi urbane — €380k — OS30
+          </div>
+        </div>
+
+        <div class="campo-card importante">
+          <div class="campo-badge badge-importante">🟡 Importante per la strategia</div>
+          <div class="campo-nome">Certificazioni possedute</div>
+          <div class="campo-desc">Molti bandi OEPV premiano le certificazioni nell'offerta tecnica. Copilot deve sapere quali si possiedono per stimare il punteggio ottenibile.</div>
+          <div class="campo-esempio">
+            <strong>Formato consigliato</strong>
+            ISO 9001:2015 — cert. n. IT-12345 — scad. 12/2026<br>
+            ISO 14001:2015 — cert. n. IT-67890 — scad. 06/2026<br>
+            White List Prefettura Roma — iscritta dal 2019
+          </div>
+        </div>
+
+        <div class="campo-card importante">
+          <div class="campo-badge badge-importante">🟡 Importante per la strategia</div>
+          <div class="campo-nome">Aree geografiche operative</div>
+          <div class="campo-desc">Indicare le regioni/province dove si opera abitualmente e dove si vuole crescere. Copilot escluderà automaticamente i bandi fuori zona.</div>
+          <div class="campo-esempio">
+            <strong>Formato consigliato</strong>
+            Zone primarie: Lazio, Toscana, Umbria<br>
+            Zone secondarie (con partner): Marche, Abruzzo<br>
+            Zone escluse: tutto il Sud Italia
+          </div>
+        </div>
+
+        <div class="campo-card importante">
+          <div class="campo-badge badge-importante">🟡 Importante per la strategia</div>
+          <div class="campo-nome">Range importi gestibili</div>
+          <div class="campo-desc">Definire soglie min/max per importo del bando. Sotto la soglia minima non vale lo sforzo; sopra la massima si rischia di non avere le risorse.</div>
+          <div class="campo-esempio">
+            <strong>Formato consigliato</strong>
+            Importo minimo interesse: €500.000<br>
+            Importo massimo gestibile da soli: €5.000.000<br>
+            Fino a €10M: solo in RTI con partner qualificato
+          </div>
+        </div>
+
+        <div class="campo-card standard full">
+          <div class="campo-badge badge-standard">⚪ Contestuale — utile per l'offerta tecnica</div>
+          <div class="campo-nome">Capacità tecniche specifiche e punti di forza</div>
+          <div class="campo-desc">Descrizione narrativa delle specializzazioni reali dell'organizzazione: tecnologie usate, metodologie particolari, know-how specifico che si traduce in punteggio tecnico nei bandi OEPV. Questa sezione è in formato libero ma deve essere concreta e verificabile.</div>
+          <div class="campo-esempio">
+            <strong>Esempio</strong>
+            "Specializzazione nelle lavorazioni su solettoni di copertura e opere di sistemazione superficiale su strutture interrate. Esperienza nella cantierizzazione in aree urbane ad alta densità con gestione contemporanea di cantieri sovrapposti. Dotazione propria di macchinari con limitata massa a pieno carico (max 3.5t) idonei a operare su solette. Piano di monitoraggio acustico e ambientale già sviluppato per cantieri simili."
+          </div>
+        </div>
+
+        <div class="campo-card standard">
+          <div class="campo-badge badge-standard">⚪ Contestuale</div>
+          <div class="campo-nome">Struttura consortile (se applicabile)</div>
+          <div class="campo-desc">Per i consorzi: elenco delle cooperative/imprese consorziate con le rispettive SOA. Copilot potrà fare il match aggregato per RTI o consorzi.</div>
+          <div class="campo-esempio">
+            <strong>Formato consigliato</strong>
+            Cooperativa A: OG1 cl. III, OS3 cl. I<br>
+            Cooperativa B: OS30 cl. II, OS24 cl. I<br>
+            Cooperativa C: OG1 cl. IV, ISO 9001
+          </div>
+        </div>
+
+        <div class="campo-card standard">
+          <div class="campo-badge badge-standard">⚪ Contestuale</div>
+          <div class="campo-nome">Partner abituali per avvalimento / subappalto</div>
+          <div class="campo-desc">Elenco di partner con cui si lavora abitualmente, le loro SOA e le categorie che coprono. Copilot potrà suggerire con chi fare RTI per bandi fuori portata.</div>
+          <div class="campo-esempio">
+            <strong>Formato consigliato</strong>
+            Partner X: copre OS24 cl. II — disponibile per subappalto<br>
+            Partner Y: copre OG3 cl. III — disponibile per RTI
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="sezione">
+      <div class="sezione-header">
+        <div class="sezione-num">3</div>
+        <div>
+          <div class="sezione-titolo">Il prompt di creazione con Copilot in Word</div>
+          <div class="sezione-desc">Da usare come primo messaggio in una sessione Word con documento vuoto</div>
+        </div>
+      </div>
+
+      <div class="doc-prompt-block" data-repo-title="Prompt di avvio per creare il documento aziendale" style="background: var(--blu-notte); color: #e8f0fe; border-radius: 4px; padding: 28px 32px; border-left: 4px solid var(--oro); font-size: 15px; line-height: 1.75; white-space: pre-line;">
+<span style="color: var(--oro-chiaro); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 14px;">PROMPT DI AVVIO — COPILOT IN WORD</span>"Devi creare un <strong style="color:var(--oro-chiaro)">documento di profilo aziendale strutturato</strong> da usare come riferimento per valutare la partecipazione a bandi di gara pubblici (D.Lgs. 36/2023).
+
+Il documento deve contenere le seguenti sezioni, in questo ordine:
+1. Dati anagrafici e identità giuridica
+2. Qualificazioni SOA (in tabella: categoria | classifica | scadenza | SOA rilasciante)
+3. Referenze lavori eseguiti ultimi 5 anni (in tabella: anno | committente | oggetto | importo | categoria SOA)
+4. Certificazioni possedute (con numero e scadenza)
+5. Capacità economico-finanziaria (fatturato per anno e per categoria)
+6. Aree geografiche di operatività
+7. Range di importi gestibili
+8. Competenze tecniche specifiche e punti di forza
+9. Eventuali partner per RTI/avvalimento/subappalto
+
+Usa un formato professionale con intestazioni chiare. Le tabelle devono essere leggibili anche quando il documento viene incollato in una chat.
+
+Lascia [DA COMPILARE] dove devo inserire i dati reali."
+      </div>
+    </div>
+
+    <div class="sezione">
+      <div class="sezione-header">
+        <div class="sezione-num">4</div>
+        <div>
+          <div class="sezione-titolo">Analisi periodica e aggiornamento</div>
+          <div class="sezione-desc">Routine semestrale per mantenere il documento aziendale completo, attuale e strategicamente utile</div>
+        </div>
+      </div>
+
+      <div style="background: white; border: 1px solid var(--linea); border-radius: 4px; padding: 20px 24px; margin-bottom: 16px;">
+        <div style="font-size: 14px; color: var(--grigio); line-height: 1.7;">
+          <strong style="color: var(--inchiostro);">Quando usarlo:</strong> ogni 6 mesi, o prima di una stagione intensa di bandi, o dopo aver vinto/perso una gara importante.<br>
+          <strong style="color: var(--inchiostro);">Cosa ci vuole:</strong> il documento aziendale attuale allegato in Copilot Chat.
+        </div>
+      </div>
+
+      <div class="doc-prompt-block" data-repo-title="Prompt P-08 Audit e aggiornamento periodico" style="background: var(--blu-notte); color: #e8f0fe; border-radius: 4px; padding: 28px 32px; border-left: 4px solid var(--oro); font-size: 15px; line-height: 1.75; white-space: pre-line; margin-bottom: 16px;">
+<span style="color: var(--oro-chiaro); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 14px;">PROMPT P-08 — AUDIT E AGGIORNAMENTO PERIODICO</span>Sei un consulente esperto di appalti pubblici (D.Lgs. 36/2023).
+Hai davanti il documento di profilo aziendale del consorzio allegato.
+
+Esegui un audit completo in tre fasi:
+
+FASE 1 — VERIFICA INTEGRITA
+Controlla che tutte le sezioni obbligatorie siano presenti e complete.
+Per ciascuna sezione dimmi:
+- Presente e completa ✓
+- Presente ma incompleta ⚠️ (specifica cosa manca)
+- Assente ✗
+
+Sezioni da verificare: dati anagrafici, SOA con scadenze, fatturato triennale per tipologia, referenze ultimi 5 anni, certificazioni con scadenze, aree geografiche, limiti operativi, competenze tecniche specifiche.
+
+FASE 2 — SCADENZE E RISCHI
+Analizza tutte le date presenti nel documento e segnala:
+- Elementi scaduti (SOA, certificazioni, visure): 🔴 CRITICO
+- Elementi in scadenza entro 90 giorni: 🟡 ATTENZIONE
+- Elementi in scadenza entro 180 giorni: 🔵 PIANIFICARE
+
+Per ogni elemento critico o in scadenza indica l'azione necessaria e il tempo stimato per il rinnovo.
+
+FASE 3 — QUALITA E AGGIORNAMENTO
+Valuta la qualità delle informazioni presenti e suggerisci miglioramenti:
+- Ci sono referenze da aggiungere rispetto all'ultima versione del documento?
+- Le competenze tecniche descritte sono ancora attuali o vanno integrate?
+- Ci sono sezioni scritte in modo troppo generico per essere utili al sistema di valutazione bandi?
+- Il fatturato va aggiornato con l'anno più recente?
+
+Chiudi con un piano d'azione prioritizzato: cosa fare subito, cosa pianificare, cosa e opzionale.</div>
+
+      <div style="background: white; border: 1px solid var(--linea); border-radius: 4px; padding: 20px 24px; margin-bottom: 14px;">
+        <div style="font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--grigio); margin-bottom: 8px;">Note d'uso</div>
+        <div style="font-size: 14px; color: var(--grigio); line-height: 1.7;">
+          Frequenza consigliata: semestrale come routine, piu ogni volta che una consorziata cambia status (nuova SOA, nuova certificazione, uscita dal consorzio).
+        </div>
+      </div>
+
+      <div class="doc-prompt-block" data-repo-title="Variante rapida controllo scadenze" style="background: var(--carta-scura); border: 1px solid var(--linea); border-left: 4px solid var(--oro); border-radius: 4px; padding: 20px 24px; font-size: 14px; line-height: 1.75; white-space: pre-line; color: var(--inchiostro); margin-bottom: 12px;">
+<span style="font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--grigio); display: block; margin-bottom: 10px;">Variante rapida</span>Analizza il documento allegato e dimmi solo:
+1) Quali SOA o certificazioni sono scadute o scadono entro 6 mesi?
+2) C'e qualche informazione che ha piu di 12 mesi e potrebbe essere obsoleta?
+Rispondi in meno di 10 righe, solo i punti critici.</div>
+
+      <div class="doc-prompt-block" data-repo-title="Variante post-gara arricchimento profilo" style="background: var(--carta-scura); border: 1px solid var(--linea); border-left: 4px solid var(--blu-medio); border-radius: 4px; padding: 20px 24px; font-size: 14px; line-height: 1.75; white-space: pre-line; color: var(--inchiostro);">
+<span style="font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--grigio); display: block; margin-bottom: 10px;">Variante post-gara</span>Abbiamo appena [partecipato a / vinto / perso] il bando [NOME BANDO].
+Leggi il documento aziendale allegato e suggerisci:
+1) Quale referenza o competenza acquisita va aggiunta al profilo?
+2) C'e qualcosa che il bando ha rivelato come mancante nel nostro profilo che dobbiamo colmare?
+3) Come riscriveresti la sezione competenze tecniche per essere piu competitivi su bandi simili in futuro?</div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ===================== PAGINA 2: FLUSSO PROMPT ===================== -->
+<div class="page" id="page-flusso">
+  <div class="page-header">
+    <div class="header-kicker">Fase 2 di 3</div>
+    <h1>Flusso Prompt<br><em>Analisi Bando</em></h1>
+    <p>Sequenza operativa da usare ogni volta che arriva un nuovo bando. Dal documento grezzo all'output strategico in 6 passaggi progressivi.</p>
+    <div class="header-meta">
+      <span class="meta-chip">Strumento: Copilot Chat + Word</span>
+      <span class="meta-chip">Durata stimata: 20–35 minuti per bando</span>
+      <span class="meta-chip">Prompt 7 richiede il documento aziendale</span>
+    </div>
+  </div>
+
+  <main>
+
+    <div class="legenda">
+      <div class="legenda-item"><div class="legenda-dot" style="background:#607d8b"></div> Orientamento</div>
+      <div class="legenda-item"><div class="legenda-dot" style="background:var(--blu-medio)"></div> Estrazione dati</div>
+      <div class="legenda-item"><div class="legenda-dot" style="background:var(--blu-notte)"></div> Analisi SOA</div>
+      <div class="legenda-item"><div class="legenda-dot" style="background:var(--verde-ok)"></div> Strategia tecnica</div>
+      <div class="legenda-item"><div class="legenda-dot" style="background:#00727a"></div> Checklist operativa</div>
+      <div class="legenda-item"><div class="legenda-dot" style="background:var(--arancio)"></div> Piano interno</div>
+      <div class="legenda-item"><div class="legenda-dot" style="background:var(--rosso)"></div> Valutazione (con doc aziendale)</div>
+    </div>
+
+    <div class="flusso">
+
+      <div class="flusso-sep">PARTE A — Comprensione del bando (senza documento aziendale)</div>
+
+      <!-- PROMPT 1 -->
+      <div class="prompt-card">
+        <div class="prompt-num-wrap">
+          <div class="prompt-num tipo-base">1</div>
+        </div>
+        <div class="prompt-body">
+          <div class="prompt-tipo-label label-base">Orientamento — il prompt del principiante</div>
+          <div class="prompt-titolo">Prima impressione (da mostrare per contrasto)</div>
+          <div class="prompt-scopo">Si usa VOLUTAMENTE come punto di partenza negativo per dimostrare il valore dei prompt successivi</div>
+          <div class="prompt-testo">"<em>Riassumimi questo bando di gara</em>"</div>
+          <div class="prompt-note">
+            <span class="nota-tag tag-tool">🔧 Copilot Chat con PDF allegato</span>
+            <span class="nota-tag tag-attenzione">⚠️ Output atteso: generico e verboso — è voluto</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="connettore">confrontare l'output con il prompt successivo → la differenza è la lezione</div>
+
+      <!-- PROMPT 2 -->
+      <div class="prompt-card">
+        <div class="prompt-num-wrap">
+          <div class="prompt-num tipo-estrazione">2</div>
+        </div>
+        <div class="prompt-body">
+          <div class="prompt-tipo-label label-estrazione">Estrazione strutturata</div>
+          <div class="prompt-titolo">Scheda gara — dati essenziali in tabella</div>
+          <div class="prompt-scopo">Estrarre in 30 secondi tutte le informazioni chiave in formato immediatamente utilizzabile</div>
+          <div class="prompt-testo">"Sei un esperto di appalti pubblici (D.Lgs. 36/2023).
+Dal bando allegato estrai queste informazioni in formato tabella:
+1) Stazione appaltante, Dipartimento e RUP
+2) Oggetto dei lavori (descrizione sintetica)
+3) CIG e CUP
+4) Importo totale — di cui: soggetto a ribasso / oneri sicurezza / costo manodopera
+5) Durata lavori in giorni
+6) Criterio di aggiudicazione e pesi tecnica/prezzo
+7) Soglia di sbarramento tecnico (se presente)
+8) Piattaforma di gara
+9) Contributo ANAC dovuto
+10) Eventuale opzione per lavori supplementari
+
+Aggiungi una riga 'NOTE CRITICHE' con max 3 elementi che potrebbero sorprendere chi legge il bando velocemente."</div>
+          <div class="prompt-note">
+            <span class="nota-tag tag-output">✓ Output: Scheda gara pronta in 30 secondi</span>
+            <span class="nota-tag tag-tool">🔧 Copilot Chat</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="connettore">approfondire i requisiti di qualificazione</div>
+
+      <!-- PROMPT 3 -->
+      <div class="prompt-card">
+        <div class="prompt-num-wrap">
+          <div class="prompt-num tipo-soa">3</div>
+        </div>
+        <div class="prompt-body">
+          <div class="prompt-tipo-label label-soa">Analisi SOA e requisiti</div>
+          <div class="prompt-titolo">Mappa completa delle qualificazioni richieste</div>
+          <div class="prompt-scopo">Capire esattamente cosa serve per partecipare — SOA, white list, certificazioni di qualità</div>
+          <div class="prompt-testo">"Dal bando e dal disciplinare allegati, estrai in una tabella tutte le categorie SOA richieste indicando per ciascuna:
+- Categoria (es. OG1, OS3...)
+- Classifica richiesta
+- Se la qualificazione è obbligatoria o facoltativa
+- Se la categoria è prevalente o scorporabile
+- Se è ammesso il subappalto
+- L'importo associato
+
+Poi elenca separatamente tutti gli altri requisiti di partecipazione (es. white list prefettura, iscrizione CCIAA, certificazione ISO, contributo ANAC, ecc.) con indicazione se la mancanza è causa automatica di esclusione.
+
+Infine dimmi: per le categorie scorporabili, è possibile coprirle tramite subappalto o serve RTI/avvalimento?"</div>
+          <div class="prompt-note">
+            <span class="nota-tag tag-output">✓ Output: Mappa SOA + requisiti esclusione</span>
+            <span class="nota-tag tag-tool">🔧 Copilot Chat con bando + disciplinare</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="connettore">analizzare dove si può fare punteggio tecnico</div>
+
+      <!-- PROMPT 4 -->
+      <div class="prompt-card">
+        <div class="prompt-num-wrap">
+          <div class="prompt-num tipo-tecnica">4</div>
+        </div>
+        <div class="prompt-body">
+          <div class="prompt-tipo-label label-tecnica">Strategia offerta tecnica</div>
+          <div class="prompt-titolo">Criteri OEPV — dove si vince e dove si perde</div>
+          <div class="prompt-scopo">Trasformare la griglia di valutazione in una mappa strategica: dove concentrare le energie per massimizzare il punteggio</div>
+          <div class="prompt-testo">"Analizza i criteri di valutazione dell'offerta tecnica di questo bando.
+Per ciascun criterio crea una tabella con:
+- Nome del criterio e punteggio massimo
+- Tipo: discrezionale (giudizio commissione) o tabellare (sì/no)
+- Cosa viene premiato concretamente (in linguaggio operativo, non burocratico)
+- Tipo di documento da produrre (relazione, dichiarazione, scheda tecnica...)
+- Difficoltà stimata di ottenere il massimo punteggio (alta/media/bassa)
+
+Poi dimmi:
+- Qual è il criterio con il miglior rapporto punteggio/sforzo?
+- Qual è la soglia minima da superare per non essere esclusi?
+- Cosa succede se si omette un criterio? È causa di esclusione o solo punteggio 0?"</div>
+          <div class="prompt-note">
+            <span class="nota-tag tag-output">✓ Output: Piano strategico offerta tecnica</span>
+            <span class="nota-tag tag-tool">🔧 Copilot Chat con disciplinare</span>
+            <span class="nota-tag tag-attenzione">⚠️ Verificare sempre con lettura umana</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="connettore">passare alla parte operativa</div>
+
+      <!-- PROMPT 5 -->
+      <div class="prompt-card">
+        <div class="prompt-num-wrap">
+          <div class="prompt-num tipo-checklist">5</div>
+        </div>
+        <div class="prompt-body">
+          <div class="prompt-tipo-label label-checklist">Checklist operativa</div>
+          <div class="prompt-titolo">Busta A — tutti i documenti richiesti senza dimenticare nulla</div>
+          <div class="prompt-scopo">Generare la checklist completa della documentazione amministrativa, già pronta per essere assegnata ai responsabili interni</div>
+          <div class="prompt-testo">"Dal disciplinare di gara, genera una checklist completa di tutti i documenti da inserire nella Busta A – Documentazione Amministrativa.
+
+Per ogni documento crea una tabella con:
+- Nome esatto del documento
+- Obbligatorio o facoltativo
+- Chi deve firmarlo (legale rappresentante / tutti i componenti del raggruppamento / consorziata esecutrice)
+- Note specifiche (es. da compilare online sulla piattaforma, da scaricare, ecc.)
+- Conseguenza della mancanza (esclusione automatica / soccorso istruttorio / nessuna)
+
+Aggiungi una sezione finale con i documenti che NON devono essere inseriti nella Busta A (per evitare confusione con le altre buste)."</div>
+          <div class="prompt-note">
+            <span class="nota-tag tag-output">✓ Output: Checklist documentale pronta all'uso</span>
+            <span class="nota-tag tag-tool">🔧 Copilot Chat → esporta in Word</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="connettore">costruire il piano di lavoro interno</div>
+
+      <!-- PROMPT 6 -->
+      <div class="prompt-card">
+        <div class="prompt-num-wrap">
+          <div class="prompt-num tipo-piano">6</div>
+        </div>
+        <div class="prompt-body">
+          <div class="prompt-tipo-label label-piano">Piano operativo interno</div>
+          <div class="prompt-titolo">Da bando a piano di lavoro distribuito per funzione</div>
+          <div class="prompt-scopo">Uscire dalla sessione con un piano operativo reale, con date e responsabili, pronto da condividere internamente</div>
+          <div class="prompt-testo">"La scadenza per presentare l'offerta è [DATA SCADENZA — da inserire].
+Costruisci un piano operativo interno con le attività da completare, organizzato per area funzionale:
+
+▸ Area Commerciale/Gare: DGUE, verifica SOA, domanda di partecipazione
+▸ Area Tecnica: relazione tecnica, piano cantierizzazione, sicurezza, CAM
+▸ Area Amministrativa: contributo ANAC, bolli, firma digitale documenti
+▸ Direzione: revisione finale, approvazione offerta economica
+
+Per ogni attività indica:
+- Descrizione sintetica
+- Data di scadenza interna (con 5 giorni di buffer rispetto alla scadenza reale)
+- Alert se la mancanza causa esclusione automatica (segnala con 🔴)
+
+Formato finale: tabella ordinata per data."</div>
+          <div class="prompt-note">
+            <span class="nota-tag tag-output">✓ Output: Piano operativo con date reali</span>
+            <span class="nota-tag tag-tool">🔧 Copilot Chat → Word → condivisione Teams</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flusso-sep">PARTE B — Valutazione strategica (richiede il documento aziendale)</div>
+
+      <!-- PROMPT 7 -->
+      <div class="prompt-card">
+        <div class="prompt-num-wrap">
+          <div class="prompt-num tipo-valutazione">7</div>
+        </div>
+        <div class="prompt-body">
+          <div class="prompt-tipo-label label-valutazione">🔴 Valutazione — il prompt più potente</div>
+          <div class="prompt-titolo">Match bando ↔ profilo aziendale — vale la pena partecipare?</div>
+          <div class="prompt-scopo">Il prompt che chiude il cerchio: collega il bando analizzato al documento aziendale per dare una risposta concreta alla domanda strategica</div>
+          <div class="prompt-testo">"Hai a disposizione due documenti:
+1) Il bando di gara (allegato A) con disciplinare e capitolato
+2) Il profilo aziendale del consorzio (allegato B)
+
+Fai un'analisi di compatibilità completa e rispondi a queste domande:
+
+<em>SEZIONE 1 — AMMISSIBILITÀ (sì/no con motivazione)</em>
+- Le SOA possedute coprono tutte le categorie obbligatorie richieste?
+- Il fatturato specifico soddisfa eventuali requisiti economici?
+- Tutte le certificazioni richieste a pena di esclusione sono presenti?
+- Ci sono cause di esclusione prevedibili dalla lettura del disciplinare?
+
+<em>SEZIONE 2 — PUNTEGGIO TECNICO STIMATO</em>
+Per ogni criterio dell'offerta tecnica, stima il punteggio ottenibile dal consorzio sulla base delle competenze e certificazioni descritte nel profilo aziendale. Presenta in tabella: criterio | punteggio max | punteggio stimato | motivazione.
+Calcola il totale e verifica se supera la soglia di sbarramento.
+
+<em>SEZIONE 3 — GAP E AZIONI SUGGERITE</em>
+- Cosa manca o è debole rispetto ai requisiti del bando?
+- Si può coprire con subappalto, avvalimento o RTI?
+- Quali criteri tecnici richiedono un investimento specifico nell'offerta?
+
+<em>SEZIONE 4 — VERDETTO FINALE</em>
+Su una scala da 1 a 5, qual è il livello di compatibilità con questo bando? Raccomandi la partecipazione? Con quale configurazione (singola, RTI, consorzio)?"</div>
+          <div class="prompt-note">
+            <span class="nota-tag tag-nuovo">🆕 Richiede documento aziendale allegato</span>
+            <span class="nota-tag tag-output">✓ Output: Decisione strategica motivata</span>
+            <span class="nota-tag tag-tool">🔧 Copilot Chat con 2+ documenti allegati</span>
+            <span class="nota-tag tag-attenzione">⚠️ Sempre validare con occhio esperto prima di decidere</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ===================== PAGINA 3: SISTEMA DI VALUTAZIONE ===================== -->
+<div class="page" id="page-valutazione">
+  <div class="page-header">
+    <div class="header-kicker">Fase 3 di 3 — Il sistema completo</div>
+    <h1>Come funziona<br><em>il Sistema</em></h1>
+    <p>Due documenti + sette prompt = un processo replicabile per ogni bando. Questa pagina spiega la logica d'insieme e mostra un esempio di output atteso.</p>
+    <div class="header-meta">
+      <span class="meta-chip">Tempo setup iniziale: 2–3 ore</span>
+      <span class="meta-chip">Tempo per bando successivo: 20–35 min</span>
+      <span class="meta-chip">Il valore cresce con ogni aggiornamento del profilo aziendale</span>
+    </div>
+  </div>
+
+  <main>
+
+    <div class="valutazione-intro">
+      <h3>La logica del sistema</h3>
+      <p>Il documento aziendale non è un esercizio una tantum: è il <strong>patrimonio di conoscenza strutturato</strong> che rende ogni analisi futura più veloce e precisa. Più è completo e aggiornato, più il Prompt 7 produce output affidabili. Il sistema non sostituisce il giudizio umano — lo amplifica.</p>
+    </div>
+
+    <div class="sezione">
+      <div class="sezione-header">
+        <div class="sezione-num">1</div>
+        <div>
+          <div class="sezione-titolo">Schema del flusso completo</div>
+          <div class="sezione-desc">Come i tre elementi si collegano tra loro</div>
+        </div>
+      </div>
+
+      <div class="schema-flusso">
+        <div class="schema-box">
+          <div class="schema-icon">📄</div>
+          <div class="schema-titolo">Documento Aziendale</div>
+          <div class="schema-sub">Creato una volta, aggiornato semestralmente. Contiene SOA, referenze, certificazioni, capacità.</div>
+        </div>
+        <div class="schema-freccia">+</div>
+        <div class="schema-box">
+          <div class="schema-icon">📋</div>
+          <div class="schema-titolo">Bando di Gara</div>
+          <div class="schema-sub">PDF o DOCX caricato in Copilot Chat. Bando + disciplinare + capitolato.</div>
+        </div>
+        <div class="schema-freccia">→</div>
+        <div class="schema-box">
+          <div class="schema-icon">🎯</div>
+          <div class="schema-titolo">Analisi + Decisione</div>
+          <div class="schema-sub">Ammissibilità, punteggio stimato, gap, raccomandazione strategica.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sezione">
+      <div class="sezione-header">
+        <div class="sezione-num">2</div>
+        <div>
+          <div class="sezione-titolo">Struttura del documento aziendale — cosa deve contenere</div>
+          <div class="sezione-desc">Checklist per verificare che il documento sia completo prima di usarlo nel Prompt 7</div>
+        </div>
+      </div>
+
+      <div class="doc-grid">
+        <div class="struttura-doc" style="grid-column: 1 / -1;">
+          <div class="struttura-header">
+            <div class="struttura-header-icon">✅</div>
+            <div>
+              <div class="struttura-header-title">Checklist completezza documento aziendale</div>
+              <div class="struttura-header-sub">Verificare prima di allegare il documento al Prompt 7</div>
+            </div>
+          </div>
+          <div class="struttura-body">
+            <div class="struttura-item">
+              <div class="struttura-step" style="background:var(--verde-light);border-color:var(--verde-ok);color:var(--verde-ok);">✓</div>
+              <div class="struttura-content">
+                <div class="struttura-nome">Tutte le SOA con classifica E scadenza</div>
+                <div class="struttura-desc">Senza le scadenze Copilot non può segnalare SOA scadute o in scadenza nei tempi del bando</div>
+              </div>
+            </div>
+            <div class="struttura-item">
+              <div class="struttura-step" style="background:var(--verde-light);border-color:var(--verde-ok);color:var(--verde-ok);">✓</div>
+              <div class="struttura-content">
+                <div class="struttura-nome">Fatturato degli ultimi 3 anni per categoria</div>
+                <div class="struttura-desc">Serve per i requisiti economico-finanziari che alcuni bandi richiedono esplicitamente</div>
+              </div>
+            </div>
+            <div class="struttura-item">
+              <div class="struttura-step" style="background:var(--verde-light);border-color:var(--verde-ok);color:var(--verde-ok);">✓</div>
+              <div class="struttura-content">
+                <div class="struttura-nome">Almeno 3–5 referenze con importo e committente</div>
+                <div class="struttura-desc">Il Prompt 7 le usa per stimare il punteggio del criterio "esperienze pregresse" nei bandi OEPV</div>
+              </div>
+            </div>
+            <div class="struttura-item">
+              <div class="struttura-step" style="background:var(--verde-light);border-color:var(--verde-ok);color:var(--verde-ok);">✓</div>
+              <div class="struttura-content">
+                <div class="struttura-nome">Certificazioni con numero e scadenza</div>
+                <div class="struttura-desc">Le ISO e simili danno punteggi tabellari in molti bandi — Copilot deve sapere quali si possiedono</div>
+              </div>
+            </div>
+            <div class="struttura-item">
+              <div class="struttura-step" style="background:#fff8e1;border-color:var(--oro);color:#795500;">!</div>
+              <div class="struttura-content">
+                <div class="struttura-nome">Aree geografiche e limiti operativi</div>
+                <div class="struttura-desc">Permette di filtrare i bandi geograficamente e di escludere subito quelli fuori portata logistica</div>
+              </div>
+            </div>
+            <div class="struttura-item">
+              <div class="struttura-step" style="background:#fff8e1;border-color:var(--oro);color:#795500;">!</div>
+              <div class="struttura-content">
+                <div class="struttura-nome">Competenze tecniche specifiche in linguaggio operativo</div>
+                <div class="struttura-desc">La sezione più difficile da scrivere ma la più strategica: consente a Copilot di collegare le competenze reali ai criteri discrezionali dei bandi OEPV</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sezione">
+      <div class="sezione-header">
+        <div class="sezione-num">3</div>
+        <div>
+          <div class="sezione-titolo">Esempio di output atteso dal Prompt 7</div>
+          <div class="sezione-desc">Basato sul bando Piazza della Radio — Roma Capitale (bando analizzato nel corso)</div>
+        </div>
+      </div>
+
+      <div class="output-esempio">
+        <h3>Analisi compatibilità — Parcheggio Piazza della Radio (CIG B9E860AD4D)</h3>
+
+        <div style="margin-bottom: 20px;">
+          <div style="font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--grigio); margin-bottom:12px;">SEZIONE 1 — AMMISSIBILITÀ</div>
+          <div class="score-row">
+            <span class="score-label">SOA OG1 cl. V obbligatoria</span>
+            <div class="score-bar-wrap"><div class="score-bar bar-verde" style="width:100%"></div></div>
+            <span class="score-val verde">✓ OK</span>
+          </div>
+          <div class="score-row">
+            <span class="score-label">SOA OS3 cl. I obbligatoria</span>
+            <div class="score-bar-wrap"><div class="score-bar bar-verde" style="width:100%"></div></div>
+            <span class="score-val verde">✓ OK</span>
+          </div>
+          <div class="score-row">
+            <span class="score-label">SOA OS30 cl. I obbligatoria</span>
+            <div class="score-bar-wrap"><div class="score-bar bar-oro" style="width:60%"></div></div>
+            <span class="score-val oro">⚠️ Verif.</span>
+          </div>
+          <div class="score-row">
+            <span class="score-label">White List Prefettura competente</span>
+            <div class="score-bar-wrap"><div class="score-bar bar-verde" style="width:100%"></div></div>
+            <span class="score-val verde">✓ OK</span>
+          </div>
+          <div class="score-row">
+            <span class="score-label">Contributo ANAC €165</span>
+            <div class="score-bar-wrap"><div class="score-bar bar-verde" style="width:100%"></div></div>
+            <span class="score-val verde">✓ Sì</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <div style="font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--grigio); margin-bottom:12px;">SEZIONE 2 — PUNTEGGIO TECNICO STIMATO (su 80)</div>
+          <div class="score-row">
+            <span class="score-label">Crit. 1.1 Avvio cantiere (max 30)</span>
+            <div class="score-bar-wrap"><div class="score-bar bar-verde" style="width:73%"></div></div>
+            <span class="score-val verde">~22</span>
+          </div>
+          <div class="score-row">
+            <span class="score-label">Crit. 1.2 Sicurezza cantiere (max 15)</span>
+            <div class="score-bar-wrap"><div class="score-bar bar-verde" style="width:80%"></div></div>
+            <span class="score-val verde">~12</span>
+          </div>
+          <div class="score-row">
+            <span class="score-label">Crit. 1.3 Impatto acustico (max 8)</span>
+            <div class="score-bar-wrap"><div class="score-bar bar-oro" style="width:50%"></div></div>
+            <span class="score-val oro">~4</span>
+          </div>
+          <div class="score-row">
+            <span class="score-label">Crit. 1.4 Polveri aerodisperse (max 7)</span>
+            <div class="score-bar-wrap"><div class="score-bar bar-oro" style="width:43%"></div></div>
+            <span class="score-val oro">~3</span>
+          </div>
+          <div class="score-row">
+            <span class="score-label">Crit. 2 Confinamento aree (max 5)</span>
+            <div class="score-bar-wrap"><div class="score-bar bar-verde" style="width:80%"></div></div>
+            <span class="score-val verde">~4</span>
+          </div>
+          <div class="score-row">
+            <span class="score-label">Crit. 3 Migliorie arredo urbano (max 8)</span>
+            <div class="score-bar-wrap"><div class="score-bar bar-rosso" style="width:25%"></div></div>
+            <span class="score-val rosso">~2</span>
+          </div>
+          <div class="score-row">
+            <span class="score-label">Crit. 4 Manutenzione opere (max 7)</span>
+            <div class="score-bar-wrap"><div class="score-bar bar-verde" style="width:71%"></div></div>
+            <span class="score-val verde">~5</span>
+          </div>
+          <div class="score-row" style="border-top: 2px solid var(--inchiostro); margin-top: 4px; padding-top: 12px;">
+            <span class="score-label" style="font-weight:700;">Totale stimato</span>
+            <div class="score-bar-wrap"><div class="score-bar bar-verde" style="width:65%"></div></div>
+            <span class="score-val verde" style="font-size:1.2rem;">~52/80</span>
+          </div>
+          <div style="font-size:12px; color:var(--verde-ok); margin-top:8px; font-style:italic;">✓ Supera la soglia di sbarramento di 40/80</div>
+        </div>
+
+        <div class="verdict positivo">
+          ✅ Raccomandazione: PARTECIPARE — compatibilità stimata 4/5. Il consorzio soddisfa i requisiti di ammissibilità e può ottenere un punteggio tecnico competitivo. Punto critico: verificare OS30 e investire sull'offerta tecnica per il criterio 1.1 (cantierizzazione), che vale 30/80 punti.
+        </div>
+      </div>
+    </div>
+
+    <div class="sezione">
+      <div class="sezione-header">
+        <div class="sezione-num">4</div>
+        <div>
+          <div class="sezione-titolo">Avvertenze per l'uso in aula</div>
+        </div>
+      </div>
+      <div style="background: #fff8e1; border: 1px solid #ffe082; border-radius: 4px; padding: 24px 28px;">
+        <div style="display:flex; flex-direction:column; gap:10px; font-size:14.5px; color:#5d4037;">
+          <div>💡 <strong>Il Prompt 7 è potente ma non infallibile:</strong> le stime di punteggio vanno sempre validate da chi conosce il bando. Copilot può sbagliare su clausole complesse o calcoli normativi.</div>
+          <div>💡 <strong>La qualità del documento aziendale determina la qualità dell'output:</strong> se le SOA sono incomplete o il fatturato è assente, il Prompt 7 produce valutazioni parziali. Spiegarlo ai partecipanti è parte della lezione.</div>
+          <div>💡 <strong>Il sistema si migliora con l'uso:</strong> dopo ogni bando, aggiornare il documento aziendale con le nuove referenze. In 6-12 mesi diventa uno strumento molto preciso.</div>
+          <div>💡 <strong>Per la dimostrazione in aula:</strong> usare il bando Piazza della Radio già analizzato + un documento aziendale fittizio ma realistico. Far vedere l'output del Prompt 7 è sempre il momento più impattante del corso.</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ===================== PAGINA 4: TEAMS ===================== -->
+<div class="page" id="page-teams">
+  <div class="page-header">
+    <div class="header-kicker">Laboratorio operativo</div>
+    <h1>Analisi di una chiamata<br><em>con Copilot in Teams</em></h1>
+    <p>Ogni fase include un prompt base, un prompt ottimizzato e una variante avanzata: i partecipanti li provano in sequenza e confrontano la qualita dei risultati.</p>
+    <div class="header-meta">
+      <span class="meta-chip">Prompt progressivi per livello</span>
+      <span class="meta-chip">Confronto output in tempo reale</span>
+      <span class="meta-chip">Focus su applicazione pratica in Teams</span>
+    </div>
+  </div>
+
+  <main>
+    <div class="sezione">
+      <div class="sezione-header">
+        <div class="sezione-num">1</div>
+        <div>
+          <div class="sezione-titolo">Trascrizione e comprensione base</div>
+        </div>
+      </div>
+
+      <div class="teams-prompt-block" data-order="1.1" data-repo-title="Teams Fase 1 - Prompt base" style="background: var(--blu-notte); color: #e8f0fe; border-radius: 4px; padding: 20px 24px; border-left: 4px solid var(--oro); font-size: 15px; line-height: 1.7; white-space: pre-line; margin-bottom: 10px;">
+<span style="color: var(--oro-chiaro); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 10px;">Prompt base</span>"Dimmi cosa e successo in questa riunione."</div>
+
+      <div class="teams-prompt-block" data-order="1.2" data-repo-title="Teams Fase 1 - Prompt ottimizzato" style="background: var(--blu-notte); color: #e8f0fe; border-radius: 4px; padding: 20px 24px; border-left: 4px solid var(--oro); font-size: 15px; line-height: 1.7; white-space: pre-line; margin-bottom: 10px;">
+<span style="color: var(--oro-chiaro); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 10px;">Prompt ottimizzato</span>"Crea un riassunto della riunione in massimo 10 righe, evidenziando l'obiettivo principale, i temi trattati e l'esito complessivo."</div>
+
+      <div class="teams-prompt-block" data-order="1.3" data-repo-title="Teams Fase 1 - Variante avanzata" style="background: var(--blu-notte); color: #e8f0fe; border-radius: 4px; padding: 20px 24px; border-left: 4px solid var(--oro); font-size: 15px; line-height: 1.7; white-space: pre-line; margin-bottom: 12px;">
+<span style="color: var(--oro-chiaro); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 10px;">Variante avanzata</span>"Riassumi la riunione in tre sezioni: (1) Contesto e obiettivo, (2) Temi principali discussi, (3) Stato al termine della chiamata. Usa un tono neutro e professionale."</div>
+
+      <div style="background: #fff8e1; border: 1px solid #ffe082; border-radius: 4px; padding: 14px 18px; color: #5d4037; font-size: 14px;">💡 Cosa osservare: quanto cambia la qualita e la lunghezza dell'output tra il primo e il terzo prompt?</div>
+    </div>
+
+    <div class="sezione">
+      <div class="sezione-header">
+        <div class="sezione-num">2</div>
+        <div>
+          <div class="sezione-titolo">Chi ha detto cosa</div>
+        </div>
+      </div>
+
+      <div class="teams-prompt-block" data-order="2.1" data-repo-title="Teams Fase 2 - Prompt base" style="background: var(--blu-notte); color: #e8f0fe; border-radius: 4px; padding: 20px 24px; border-left: 4px solid var(--oro); font-size: 15px; line-height: 1.7; white-space: pre-line; margin-bottom: 10px;">
+<span style="color: var(--oro-chiaro); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 10px;">Prompt base</span>"Chi ha partecipato alla riunione?"</div>
+
+      <div class="teams-prompt-block" data-order="2.2" data-repo-title="Teams Fase 2 - Prompt ottimizzato" style="background: var(--blu-notte); color: #e8f0fe; border-radius: 4px; padding: 20px 24px; border-left: 4px solid var(--oro); font-size: 15px; line-height: 1.7; white-space: pre-line; margin-bottom: 10px;">
+<span style="color: var(--oro-chiaro); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 10px;">Prompt ottimizzato</span>"Elenca i partecipanti alla riunione, indicando per ognuno il ruolo se riconoscibile e i principali contributi che ha portato alla discussione."</div>
+
+      <div class="teams-prompt-block" data-order="2.3" data-repo-title="Teams Fase 2 - Variante avanzata" style="background: var(--blu-notte); color: #e8f0fe; border-radius: 4px; padding: 20px 24px; border-left: 4px solid var(--oro); font-size: 15px; line-height: 1.7; white-space: pre-line; margin-bottom: 12px;">
+<span style="color: var(--oro-chiaro); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 10px;">Variante avanzata</span>"Crea una tabella con tre colonne: Partecipante | Ruolo/contesto | Contributo chiave. Includi solo le persone che hanno preso la parola in modo significativo."</div>
+
+      <div style="background: #fff8e1; border: 1px solid #ffe082; border-radius: 4px; padding: 14px 18px; color: #5d4037; font-size: 14px;">💡 Cosa osservare: Copilot riesce a distinguere ruoli e responsabilita? Quanto e accurata l'attribuzione delle affermazioni?</div>
+    </div>
+
+    <div class="sezione">
+      <div class="sezione-header">
+        <div class="sezione-num">3</div>
+        <div>
+          <div class="sezione-titolo">Punti chiave, decisioni e open point</div>
+        </div>
+      </div>
+
+      <div class="teams-prompt-block" data-order="3.1" data-repo-title="Teams Fase 3 - Prompt base" style="background: var(--blu-notte); color: #e8f0fe; border-radius: 4px; padding: 20px 24px; border-left: 4px solid var(--oro); font-size: 15px; line-height: 1.7; white-space: pre-line; margin-bottom: 10px;">
+<span style="color: var(--oro-chiaro); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 10px;">Prompt base</span>"Quali sono le cose piu importanti dette in questa chiamata?"</div>
+
+      <div class="teams-prompt-block" data-order="3.2" data-repo-title="Teams Fase 3 - Prompt ottimizzato" style="background: var(--blu-notte); color: #e8f0fe; border-radius: 4px; padding: 20px 24px; border-left: 4px solid var(--oro); font-size: 15px; line-height: 1.7; white-space: pre-line; margin-bottom: 10px;">
+<span style="color: var(--oro-chiaro); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 10px;">Prompt ottimizzato</span>"Estrai dalla riunione: (1) le decisioni prese, (2) i problemi aperti non risolti, (3) le domande rimaste senza risposta."</div>
+
+      <div class="teams-prompt-block" data-order="3.3" data-repo-title="Teams Fase 3 - Variante avanzata" style="background: var(--blu-notte); color: #e8f0fe; border-radius: 4px; padding: 20px 24px; border-left: 4px solid var(--oro); font-size: 15px; line-height: 1.7; white-space: pre-line; margin-bottom: 12px;">
+<span style="color: var(--oro-chiaro); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 10px;">Variante avanzata</span>"Analizza la trascrizione e compila tre elenchi separati:
+
+Decisioni formali: accordi presi con consenso esplicito
+Punti da chiarire: temi rimasti aperti o ambigui
+Rischi o criticita emerse: problemi segnalati ma non ancora affrontati"</div>
+
+      <div style="background: #fff8e1; border: 1px solid #ffe082; border-radius: 4px; padding: 14px 18px; color: #5d4037; font-size: 14px;">💡 Cosa osservare: riesce a distinguere una decisione presa da un semplice argomento discusso?</div>
+    </div>
+
+    <div class="sezione">
+      <div class="sezione-header">
+        <div class="sezione-num">4</div>
+        <div>
+          <div class="sezione-titolo">Action items e checklist</div>
+        </div>
+      </div>
+
+      <div class="teams-prompt-block" data-order="4.1" data-repo-title="Teams Fase 4 - Prompt base" style="background: var(--blu-notte); color: #e8f0fe; border-radius: 4px; padding: 20px 24px; border-left: 4px solid var(--oro); font-size: 15px; line-height: 1.7; white-space: pre-line; margin-bottom: 10px;">
+<span style="color: var(--oro-chiaro); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 10px;">Prompt base</span>"Cosa dobbiamo fare dopo questa riunione?"</div>
+
+      <div class="teams-prompt-block" data-order="4.2" data-repo-title="Teams Fase 4 - Prompt ottimizzato" style="background: var(--blu-notte); color: #e8f0fe; border-radius: 4px; padding: 20px 24px; border-left: 4px solid var(--oro); font-size: 15px; line-height: 1.7; white-space: pre-line; margin-bottom: 10px;">
+<span style="color: var(--oro-chiaro); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 10px;">Prompt ottimizzato</span>"Elenca tutte le attivita da svolgere dopo la riunione, indicando per ognuna: la descrizione del compito, il responsabile nominato (se citato) e la scadenza (se indicata)."</div>
+
+      <div class="teams-prompt-block" data-order="4.3" data-repo-title="Teams Fase 4 - Variante avanzata" style="background: var(--blu-notte); color: #e8f0fe; border-radius: 4px; padding: 20px 24px; border-left: 4px solid var(--oro); font-size: 15px; line-height: 1.7; white-space: pre-line; margin-bottom: 12px;">
+<span style="color: var(--oro-chiaro); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 10px;">Variante avanzata</span>"Genera una checklist operativa in formato tabella con le colonne: Attivita | Responsabile | Scadenza | Priorita (Alta/Media/Bassa). Per le priorita, deducile dal tono e dal contesto della discussione."</div>
+
+      <div style="background: #fff8e1; border: 1px solid #ffe082; border-radius: 4px; padding: 14px 18px; color: #5d4037; font-size: 14px;">💡 Cosa osservare: come gestisce i task impliciti, cioe quelli non assegnati esplicitamente ma chiaramente attesi?</div>
+    </div>
+
+    <div class="sezione">
+      <div class="sezione-header">
+        <div class="sezione-num">5</div>
+        <div>
+          <div class="sezione-titolo">Documentazione finale</div>
+        </div>
+      </div>
+
+      <div class="teams-prompt-block" data-order="5.1" data-repo-title="Teams Fase 5 - Verbale formale" style="background: var(--blu-notte); color: #e8f0fe; border-radius: 4px; padding: 20px 24px; border-left: 4px solid var(--oro); font-size: 15px; line-height: 1.7; white-space: pre-line; margin-bottom: 10px;">
+<span style="color: var(--oro-chiaro); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 10px;">Verbale formale</span>"Genera un verbale formale di questa riunione. Includi: data e ora, partecipanti, ordine del giorno, sintesi dei punti discussi per ciascun tema, decisioni prese, azioni da svolgere con responsabile e scadenza. Usa un formato professionale adatto alla conservazione agli atti."</div>
+
+      <div class="teams-prompt-block" data-order="5.2" data-repo-title="Teams Fase 5 - Email di follow-up" style="background: var(--blu-notte); color: #e8f0fe; border-radius: 4px; padding: 20px 24px; border-left: 4px solid var(--oro); font-size: 15px; line-height: 1.7; white-space: pre-line; margin-bottom: 10px;">
+<span style="color: var(--oro-chiaro); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 10px;">Email di follow-up</span>"Scrivi un'email di follow-up da inviare ai partecipanti entro oggi. L'email deve: ringraziare per la partecipazione, riassumere in 3-4 punti i principali esiti, elencare le azioni assegnate con responsabile, indicare la prossima riunione se prevista. Tono professionale ma diretto."</div>
+
+      <div class="teams-prompt-block" data-order="5.3" data-repo-title="Teams Fase 5 - Slide di sintesi" style="background: var(--blu-notte); color: #e8f0fe; border-radius: 4px; padding: 20px 24px; border-left: 4px solid var(--oro); font-size: 15px; line-height: 1.7; white-space: pre-line;">
+<span style="color: var(--oro-chiaro); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 10px;">Slide di sintesi (testo per PowerPoint)</span>"Genera il contenuto per 3 slide di sintesi della riunione: Slide 1 - Titolo e obiettivo; Slide 2 - Decisioni chiave e open point; Slide 3 - Piano d'azione con responsabili. Per ogni slide fornisci un titolo, 4-5 bullet point sintetici e una nota per il relatore."</div>
+    </div>
+  </main>
+</div>
+
+<!-- ===================== PAGINA 5: REPOSITORY PROMPT ===================== -->
+<div class="page" id="page-repository">
+  <div class="page-header">
+    <div class="header-kicker">Archivio generale</div>
+    <h1>Repository Prompt<br><em>Ricerca e Copia</em></h1>
+    <p>Sezione unica dove trovare tutti i prompt presenti nel sito, filtrarli per sezione e copiarli con un click.</p>
+    <div class="header-meta">
+      <span class="meta-chip">Filtro per sezione</span>
+      <span class="meta-chip">Ricerca per parole chiave</span>
+      <span class="meta-chip">Copia rapida di ogni prompt</span>
+    </div>
+  </div>
+
+  <main>
+    <div class="repo-controls">
+      <input id="repo-search" class="repo-search" type="text" placeholder="Cerca nel titolo o nel testo del prompt...">
+      <select id="repo-filter" class="repo-filter">
+        <option value="all">Tutte le sezioni</option>
+      </select>
+      <div id="repo-count" class="repo-count">0 prompt</div>
+    </div>
+
+    <div id="repo-list" class="repo-grid"></div>
+  </main>
+</div>
+
+<footer>Sistema Analisi Bandi con Microsoft Copilot 365 · Materiale formativo interno · Da aggiornare con i feedback del gruppo</footer>
+
+<script>
+const repoPrompts = [];
+let currentGarePage = 'doc';
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+}
+
+function showArea(area, tabElement) {
+  document.querySelectorAll('.nav-main-tab').forEach(t => t.classList.remove('active'));
+  if (tabElement) tabElement.classList.add('active');
+
+  const subnav = document.getElementById('gare-subnav');
+  if (area === 'gare') {
+    subnav.classList.add('active');
+    showGarePage(currentGarePage);
+  } else if (area === 'teams') {
+    subnav.classList.remove('active');
+    showPage('teams');
+  } else {
+    subnav.classList.remove('active');
+    showPage('repository');
+  }
+}
+
+function showGarePage(id, tabElement) {
+  currentGarePage = id;
+  showPage(id);
+
+  document.querySelectorAll('.nav-sub-tab').forEach(t => t.classList.remove('active'));
+  if (tabElement) {
+    tabElement.classList.add('active');
+  } else {
+    const fallbackTab = document.querySelector('.nav-sub-tab[onclick*="\'' + id + '\'"]');
+    if (fallbackTab) fallbackTab.classList.add('active');
+  }
+}
+
+function normalizePromptText(text) {
+  return text.replace(/\s+\n/g, '\n').trim();
+}
+
+function extractQuotedPrompt(text) {
+  const normalized = normalizePromptText(text || '');
+  const firstQuote = normalized.indexOf('"');
+  const lastQuote = normalized.lastIndexOf('"');
+
+  if (firstQuote !== -1 && lastQuote > firstQuote) {
+    return normalizePromptText(normalized.slice(firstQuote + 1, lastQuote));
+  }
+
+  return normalized;
+}
+
+function getCleanPromptText(container) {
+  const clone = container.cloneNode(true);
+  clone.querySelectorAll('.prompt-copy').forEach(btn => btn.remove());
+
+  // In document prompt blocks, top labels are decorative and should not be copied.
+  if (clone.classList && (clone.classList.contains('doc-prompt-block') || clone.classList.contains('teams-prompt-block'))) {
+    clone.querySelectorAll('span').forEach(el => el.remove());
+  }
+
+  return extractQuotedPrompt(clone.textContent || '');
+}
+
+function copyPromptText(button, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    const original = button.textContent;
+    button.textContent = 'Copiato';
+    setTimeout(() => {
+      button.textContent = original;
+    }, 1200);
+  });
+}
+
+function attachInlinePromptCopyButtons() {
+  document.querySelectorAll('#page-flusso .prompt-body').forEach(body => {
+    const textEl = body.querySelector('.prompt-testo');
+    if (!textEl || body.querySelector('.prompt-copy')) return;
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'prompt-copy';
+    button.textContent = 'Copia prompt';
+    button.addEventListener('click', () => {
+      copyPromptText(button, extractQuotedPrompt(textEl.textContent || ''));
+    });
+
+    body.insertBefore(button, textEl);
+  });
+
+  document.querySelectorAll('#page-doc .doc-prompt-block').forEach(docPrompt => {
+    if (docPrompt.querySelector('.prompt-copy')) return;
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'prompt-copy';
+    button.textContent = 'Copia prompt';
+    button.addEventListener('click', () => {
+      copyPromptText(button, getCleanPromptText(docPrompt));
+    });
+    docPrompt.insertBefore(button, docPrompt.firstChild);
+  });
+
+  document.querySelectorAll('#page-teams .teams-prompt-block').forEach(teamsPrompt => {
+    if (teamsPrompt.querySelector('.prompt-copy')) return;
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'prompt-copy';
+    button.textContent = 'Copia prompt';
+    button.addEventListener('click', () => {
+      copyPromptText(button, getCleanPromptText(teamsPrompt));
+    });
+    teamsPrompt.insertBefore(button, teamsPrompt.firstChild);
+  });
+}
+
+function renderRepository() {
+  const list = document.getElementById('repo-list');
+  const filter = document.getElementById('repo-filter').value;
+  const query = document.getElementById('repo-search').value.trim().toLowerCase();
+
+  const filtered = repoPrompts.filter(item => {
+    const sectionOk = filter === 'all' || item.section === filter;
+    const queryOk = !query || (item.title + ' ' + item.text).toLowerCase().includes(query);
+    return sectionOk && queryOk;
+  }).sort((a, b) => {
+    if (a.sectionOrder !== b.sectionOrder) return a.sectionOrder - b.sectionOrder;
+    return (a.promptOrder || 999) - (b.promptOrder || 999);
+  });
+
+  document.getElementById('repo-count').textContent = filtered.length + (filtered.length === 1 ? ' prompt' : ' prompt');
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="repo-empty">Nessun prompt trovato con i filtri attuali.</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map((item, index) => {
+    return '<article class="repo-card">'
+      + '<div class="repo-head">'
+      + '<div>'
+      + '<div class="repo-meta">'
+      + '<span class="repo-chip">' + item.sectionLabel + '</span>'
+      + '<span class="repo-chip">' + item.topicLabel + '</span>'
+      + '</div>'
+      + '<div class="repo-title">' + item.title + '</div>'
+      + '</div>'
+      + '<button class="repo-copy" onclick="copyPromptText(this, repoPromptsFiltered[' + index + '].text)">Copia prompt</button>'
+      + '</div>'
+      + '<div class="repo-text">' + item.text.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</div>'
+      + '</article>';
+  }).join('');
+
+  window.repoPromptsFiltered = filtered;
+}
+
+function buildRepositoryData() {
+  document.querySelectorAll('#page-flusso .prompt-card').forEach(card => {
+    const promptNum = parseInt(card.querySelector('.prompt-num')?.textContent?.trim() || '0', 10) || 0;
+    const label = card.querySelector('.prompt-tipo-label')?.textContent?.trim() || 'Altro';
+    const baseTitle = card.querySelector('.prompt-titolo')?.textContent?.trim() || 'Prompt senza titolo';
+    const title = promptNum ? ('Prompt ' + promptNum + ' - ' + baseTitle) : baseTitle;
+    const text = extractQuotedPrompt(card.querySelector('.prompt-testo')?.textContent || '');
+    const topicKey = label.toLowerCase();
+
+    repoPrompts.push({
+      section: 'flusso-prompt-bando',
+      sectionLabel: 'Flusso Prompt Bando',
+      sectionOrder: 1,
+      promptOrder: promptNum,
+      topic: topicKey,
+      topicLabel: label,
+      source: 'Flusso Prompt Bando',
+      title: title,
+      text: text
+    });
+  });
+
+  document.querySelectorAll('#page-doc .doc-prompt-block').forEach(promptDoc => {
+    const text = getCleanPromptText(promptDoc);
+    const title = promptDoc.dataset.repoTitle || 'Prompt documento aziendale';
+    const isP08 = /P-08/i.test(title);
+    const isRapida = /Variante rapida/i.test(title);
+    const isPostGara = /post-gara/i.test(title);
+    const order = isP08 ? 2 : (isRapida ? 3 : (isPostGara ? 4 : 1));
+
+    repoPrompts.push({
+      section: 'documento-aziendale',
+      sectionLabel: 'Documento Aziendale',
+      sectionOrder: 2,
+      promptOrder: order,
+      topic: 'documento aziendale',
+      topicLabel: 'Documento Aziendale',
+      source: 'Documento Aziendale',
+      title: title,
+      text: text
+    });
+  });
+
+  document.querySelectorAll('#page-teams .teams-prompt-block').forEach(promptTeams => {
+    const text = getCleanPromptText(promptTeams);
+    const title = promptTeams.dataset.repoTitle || 'Prompt Teams';
+    const order = parseFloat(promptTeams.dataset.order || '99');
+
+    repoPrompts.push({
+      section: 'teams',
+      sectionLabel: 'Teams',
+      sectionOrder: 3,
+      promptOrder: order,
+      topic: 'teams',
+      topicLabel: 'Teams',
+      source: 'Teams',
+      title: title,
+      text: text
+    });
+  });
+
+  const sectionSelect = document.getElementById('repo-filter');
+  const uniqueSections = Array.from(new Set(repoPrompts.map(p => p.section)));
+  uniqueSections.forEach(section => {
+    const first = repoPrompts.find(p => p.section === section);
+    const opt = document.createElement('option');
+    opt.value = section;
+    opt.textContent = first ? first.sectionLabel : section;
+    sectionSelect.appendChild(opt);
+  });
+
+  document.getElementById('repo-search').addEventListener('input', renderRepository);
+  sectionSelect.addEventListener('change', renderRepository);
+  renderRepository();
+}
+
+attachInlinePromptCopyButtons();
+buildRepositoryData();
+</script>
+</body>
+</html>
