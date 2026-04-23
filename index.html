@@ -322,7 +322,7 @@ main { max-width: 1080px; margin: 0 auto; padding: 52px 40px; }
   .meta-chip { font-size: 11px; padding: 4px 10px; }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 550px) {
   body { font-size: 15px; }
   .page-header { padding: 24px 16px; }
   .page-header h1 { font-size: 1.5rem; line-height: 1.2; }
@@ -330,9 +330,79 @@ main { max-width: 1080px; margin: 0 auto; padding: 52px 40px; }
   .header-kicker { font-size: 10px; margin-bottom: 10px; }
   main { padding: 20px 12px; }
   .nav { border-bottom-width: 2px; }
-  .nav-tab { padding: 10px 8px; font-size: 10px; min-width: 80px; }
-  .nav-main-tab { flex: 1 1 auto; }
-  .nav-sub-tab { flex: 1 1 50%; }
+  .nav-tab { padding: 8px 6px; font-size: 9px; min-width: auto; flex: 1 1 33.33%; text-align: center; }
+  .nav-main-tab { flex: 1 1 33.33%; }
+  .nav-sub-tab { flex: 1 1 33.33%; }
+  .sezione { margin-bottom: 32px; }
+  .sezione-header { gap: 10px; margin-bottom: 16px; padding-bottom: 10px; }
+  .sezione-num { font-size: 1.3rem; }
+  .sezione-titolo { font-size: 0.95rem; }
+  .sezione-desc { font-size: 12px; }
+  
+  .repo-controls { padding: 14px; grid-template-columns: 1fr; gap: 8px; }
+  .repo-search, .repo-filter { padding: 8px 10px; font-size: 13px; }
+  .repo-chip { font-size: 9px; padding: 2px 5px; }
+  .repo-card { padding: 12px 14px; }
+  .repo-head { gap: 8px; }
+  .repo-title { font-size: 0.9rem; }
+  .repo-copy { padding: 5px 8px; font-size: 9px; }
+  .repo-text { padding: 10px 12px; font-size: 12px; }
+  
+  .campo-card { padding: 14px 16px; }
+  .campo-badge { font-size: 8px; padding: 2px 5px; margin-bottom: 6px; }
+  .campo-nome { font-size: 0.9rem; margin-bottom: 4px; }
+  .campo-desc { font-size: 12px; margin-bottom: 10px; }
+  .campo-esempio { padding: 8px 10px; font-size: 11px; }
+  
+  .flusso::before { left: 16px; width: 1.5px; }
+  .prompt-card { gap: 12px; padding: 12px 0; }
+  .prompt-num { width: 36px; height: 36px; font-size: 0.9rem; }
+  .prompt-num-wrap { flex-shrink: 0; }
+  .prompt-body { padding: 12px 14px; margin-bottom: 2px; }
+  .prompt-titolo { font-size: 0.95rem; }
+  .prompt-scopo { font-size: 12px; margin-bottom: 10px; }
+  .prompt-testo { padding: 10px 12px; font-size: 12px; line-height: 1.5; }
+  .prompt-copy { padding: 5px 8px; font-size: 9px; }
+  .connettore { padding: 4px 0 4px 44px; font-size: 9px; }
+  .flusso-sep { margin: 10px 0 10px 44px; padding: 7px 10px; font-size: 9px; }
+  
+  .struttura-header { padding: 10px 14px; gap: 8px; }
+  .struttura-header-icon { font-size: 16px; }
+  .struttura-header-title { font-size: 0.9rem; }
+  .struttura-header-sub { font-size: 10px; }
+  .struttura-body { padding: 12px 14px; }
+  .struttura-item { gap: 10px; padding: 6px 0; }
+  .struttura-step { width: 22px; height: 22px; font-size: 9px; }
+  .struttura-nome { font-size: 12px; }
+  .struttura-desc { font-size: 11px; }
+  
+  .schema-flusso { padding: 12px 10px; margin-bottom: 24px; }
+  .schema-box { padding: 8px; }
+  .schema-icon { font-size: 22px; }
+  .schema-titolo { font-size: 0.8rem; }
+  .schema-sub { font-size: 10px; }
+  
+  .valutazione-intro { padding: 16px 20px; margin-bottom: 20px; border-left-width: 3px; }
+  .valutazione-intro h3 { font-size: 0.95rem; margin-bottom: 8px; }
+  .valutazione-intro p { font-size: 12px; }
+  
+  .output-esempio { padding: 16px 18px; }
+  .output-esempio h3 { font-size: 0.9rem; margin-bottom: 12px; }
+  .score-row { gap: 10px; padding: 6px 0; }
+  .score-label { font-size: 12px; }
+  .score-bar-wrap { width: 70px; height: 6px; }
+  .score-val { font-size: 0.85rem; min-width: 30px; }
+  .verdict { margin-top: 10px; padding: 10px 12px; font-size: 12px; border-left-width: 3px; }
+  
+  .legenda { gap: 8px; padding: 12px 14px; }
+  .legenda-item { font-size: 10px; gap: 6px; }
+  .legenda-dot { width: 8px; height: 8px; }
+  
+  .meta-chip { font-size: 10px; padding: 4px 8px; }
+  .header-meta { gap: 8px; }
+  
+  footer { padding: 20px 12px; font-size: 11px; }
+}
   .sezione { margin-bottom: 32px; }
   .sezione-header { gap: 10px; margin-bottom: 16px; padding-bottom: 10px; }
   .sezione-num { font-size: 1.5rem; }
